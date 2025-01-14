@@ -1,4 +1,5 @@
 ﻿using School_Management_System.Domain.Entities;
+using School_Management_System.Domain.Helpers;
 using School_Management_System.Service.Responses;
 
 namespace School_Management_System.Service.Interfaces
@@ -13,5 +14,6 @@ namespace School_Management_System.Service.Interfaces
         Task<ServiceResponse<Student>> DeleteAsync(int id);
         Task<bool> IsNameExists(string name);
         Task<bool> IsNameExistsExcludeSelf(string name, int id);
+        IQueryable<Student> GetStudentQueryable(string search, StudentOrderingEnum orderBy);
     }
 }

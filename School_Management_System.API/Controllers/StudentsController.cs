@@ -25,6 +25,13 @@ namespace School_Management_System.API.Controllers
             return Ok(response);
         }
 
+        [HttpGet("Paginated List")]
+        public async Task<IActionResult> GetPaginatedStudent([FromQuery] StudentPaginatedListQuery studentPaginated)
+        {
+            var result = await _mediator.Send(studentPaginated);
+            return Ok(result);
+        }
+
         [HttpGet("{id:int}")]
         public async Task<IActionResult> Get(int id)
         {

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using School_Management_System.Domain.Entities;
+using School_Management_System.Domain.Helpers;
 using School_Management_System.Infrastructure.Interfaces;
 using School_Management_System.Service.Interfaces;
 using School_Management_System.Service.Responses;
@@ -61,6 +62,34 @@ namespace School_Management_System.Service.Implementations
                 return new ServiceResponse<Student>(false, $"Student with Id = {id} is not found");
 
             return new ServiceResponse<Student>(true, "Successfull response", student);
+        }
+
+        public IQueryable<Student> GetStudentQueryable(string search, StudentOrderingEnum orderBy)
+        {
+            var studentQueryable = _studentRepository.GetNoTracking().Include(s => s.Department).AsQueryable();
+            if (!string.IsNullOrEmpty(search))
+                studentQueryable = studentQueryable.Where(s => s.Name.ToLower().Contains(search.ToLower()));
+
+            switch (orderBy)
+            {
+                case StudentOrderingEnum.Id:
+                    studentQueryable = studentQueryable.OrderBy(s => s.Id);
+                    break;
+                case StudentOrderingEnum.Name:
+                    studentQueryable = studentQueryable.OrderBy(s => s.Name);
+                    break;
+                case StudentOrderingEnum.Address:
+                    studentQueryable = studentQueryable.OrderBy(s => s.Address);
+                    break;
+                case StudentOrderingEnum.Department:
+                    studentQueryable = studentQueryable.OrderBy(s => s.Department.Name);
+                    break;
+                default:
+                    studentQueryable = studentQueryable.OrderBy(s => s.Id);
+                    break;
+            }
+
+            return studentQueryable;
         }
 
         public async Task<bool> IsNameExists(string name)
