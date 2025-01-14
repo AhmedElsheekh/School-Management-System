@@ -6,14 +6,16 @@ using School_Management_System.Core.Features.Students.Queries.Models;
 using School_Management_System.Core.Features.Students.Queries.Results;
 using School_Management_System.Core.Responses;
 using School_Management_System.Core.Wrappers;
+using School_Management_System.Domain.Entities;
 using School_Management_System.Service.Interfaces;
+using System.Linq.Expressions;
 
 namespace School_Management_System.Core.Features.Students.Queries.Handlers
 {
     public class StudentQueryHandler : ResponseHandler,
         IRequestHandler<StudentsListQuery, BaseResponse>,
         IRequestHandler<StudentByIdQuery, BaseResponse>,
-        IRequestHandler<PaginatedStudentListQuery, PaginatedResult<PaginatedStudentsListResult>>
+        IRequestHandler<StudentPaginatedListQuery, PaginatedResult<StudentPaginatedListResult>>
     {
         private readonly IStudentService _studentService;
         private readonly IMapper _mapper;
@@ -42,9 +44,13 @@ namespace School_Management_System.Core.Features.Students.Queries.Handlers
             return new SuccessResponse<StudentDetailsResult>(mappedStudent, serviceResponse.Message);
         }
 
-        public Task<PaginatedResult<PaginatedStudentsListResult>> Handle(PaginatedStudentListQuery request, CancellationToken cancellationToken)
+        public Task<PaginatedResult<StudentPaginatedListResult>> Handle(StudentPaginatedListQuery request, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            Expression<Func<Student, StudentPaginatedListResult>> expression =
+                e => new StudentPaginatedListResult(e.Id, e.Name, e.Address, e.Phone, e.Department.Name);
+            var studentQueryable = _studentService.GetStudentQueryable(request.Search, request.OrderBy);
+            var paginatedList = studentQueryable.Select(expression).ToPaginatedListAsync(request.PageNumber, request.PageSize);
+            return paginatedList;
         }
     }
 }
